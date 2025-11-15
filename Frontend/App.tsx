@@ -23,7 +23,7 @@ const App: React.FC = () => {
     return new Promise((resolve, reject) => {
       const video = videoRef.current;
       if (!video) {
-        return reject("Video element not found");
+        return reject("Видеоэлемент не найден");
       }
 
       const drawFrame = () => {
@@ -32,7 +32,7 @@ const App: React.FC = () => {
         canvas.height = video.videoHeight;
         const ctx = canvas.getContext('2d');
         if (!ctx) {
-          return reject("Could not get canvas context");
+          return reject("Не удалось получить контекст холста");
         }
         ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
         const dataUrl = canvas.toDataURL('image/jpeg');
@@ -50,7 +50,7 @@ const App: React.FC = () => {
         const onError = (e: Event) => {
           video.removeEventListener('canplay', onCanPlay);
           video.removeEventListener('error', onError);
-          reject(`Video element failed to load: ${e.type}`);
+          reject(`Видеоэлемент не удалось загрузить: ${e.type}`);
         };
         video.addEventListener('canplay', onCanPlay);
         video.addEventListener('error', onError);
@@ -59,7 +59,7 @@ const App: React.FC = () => {
   }, []);
 
   const runSimulationStep = useCallback(async () => {
-    addLog('Initiating new scan...');
+    addLog('Инициация нового сканирования...');
     setAppState(AppState.Scanning);
 
     // 1. Update satellite position
@@ -68,34 +68,34 @@ const App: React.FC = () => {
         const newLat = prev.lat + (Math.random() - 0.5) * 2;
         const newHeading = (prev.heading + 15) % 360;
         const clampedLat = Math.max(75, Math.min(85, newLat));
-        addLog(`Satellite moved to ${clampedLat.toFixed(2)}, ${newLng.toFixed(2)}`);
+        addLog(`Спутник переместился на ${clampedLat.toFixed(2)}, ${newLng.toFixed(2)}`);
         return { lat: clampedLat, lng: newLng, heading: newHeading };
     });
 
     try {
         // 2. Capture frame from video feed
-        addLog('Capturing frame from live feed...');
+        addLog('Захват кадра из прямой трансляции...');
         const base64Image = await captureFrame();
         
         // 3. Analyze image with Gemini
-        addLog('Analyzing image for pollution signatures...');
+        addLog('Анализ изображения на предмет признаков загрязнения...');
         setAppState(AppState.Analyzing);
         
         const analysisResult = await analyzeImage(base64Image);
 
         if (analysisResult && analysisResult.length > 0) {
             setPollutionData(prev => [...prev.filter(p => Date.now() - p.timestamp < 60000), ...analysisResult]);
-            addLog(`Analysis complete. Detected ${analysisResult.length} potential pollution zones.`, 'success');
+            addLog(`Анализ завершен. Обнаружено ${analysisResult.length} потенциальных зон загрязнения.`, 'success');
         } else {
-            addLog('Analysis complete. No pollution detected.');
+            addLog('Анализ завершен. Загрязнений не обнаружено.');
         }
     } catch (error) {
         console.error("Analysis failed:", error);
-        addLog(`AI analysis failed. ${error instanceof Error ? error.message : 'See console for details.'}`, 'error');
+        addLog(`Анализ ИИ не удался. ${error instanceof Error ? error.message : 'Подробности в консоли.'}`, 'error');
         // Fallback to mock data on error
         const mockPollution: PollutionData[] = [
           {
-            type: 'Mock Oil Slick',
+            type: 'Имитация нефтяного пятна',
             confidence: 0.85,
             geometry: {
               type: 'Polygon',
@@ -112,14 +112,14 @@ const App: React.FC = () => {
   }, [addLog, captureFrame]);
 
   const startSimulation = useCallback(() => {
-    addLog('Starting real-time monitoring sequence.', 'success');
+    addLog('Запуск последовательности мониторинга в реальном времени.', 'success');
     setAppState(AppState.Idle);
     runSimulationStep();
     simulationIntervalRef.current = window.setInterval(runSimulationStep, 10000); // 10 seconds per frame
   }, [addLog, runSimulationStep]);
 
   const stopSimulation = useCallback(() => {
-    addLog('Stopping real-time monitoring.');
+    addLog('Остановка мониторинга в реальном времени.');
     setAppState(AppState.Stopped);
     if (simulationIntervalRef.current) {
         clearInterval(simulationIntervalRef.current);

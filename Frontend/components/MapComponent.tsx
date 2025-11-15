@@ -96,7 +96,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ satellitePosition, pollutio
       }).bindPopup(`
         <div class="font-sans">
           <h3 class="font-bold text-lg text-red-400 border-b border-gray-600 mb-2 pb-1">${p.type}</h3>
-          <p class="text-sm"><strong class="font-semibold text-gray-300">Confidence:</strong> ${(p.confidence * 100).toFixed(1)}%</p>
+          <p class="text-sm"><strong class="font-semibold text-gray-300">Уверенность:</strong> ${(p.confidence * 100).toFixed(1)}%</p>
         </div>
       `);
       layer.addLayer(polygon);
